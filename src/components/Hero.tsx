@@ -4,7 +4,7 @@ import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
 
 export const Hero = () => {
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
+    <section id="home" className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16 relative">
       <div className="max-w-4xl mx-auto text-center">
         <div className="animate-fade-in">
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
@@ -18,7 +18,7 @@ export const Hero = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
             <Button 
               size="lg" 
-              className="bg-white text-black hover:bg-gray-200 transition-colors duration-300"
+              className="bg-white text-black hover:bg-gray-200 transition-colors duration-300 font-semibold"
               onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
             >
               View My Work
@@ -26,7 +26,7 @@ export const Hero = () => {
             <Button 
               variant="outline" 
               size="lg" 
-              className="border-gray-600 text-white hover:bg-gray-800 transition-colors duration-300"
+              className="border-2 border-white text-white hover:bg-white hover:text-black transition-all duration-300 font-semibold"
               onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Get In Touch
