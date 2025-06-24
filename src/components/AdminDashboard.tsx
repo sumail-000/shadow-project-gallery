@@ -9,7 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Users, Eye, MousePointer, TrendingUp, Upload, Settings } from "lucide-react";
 
 export const AdminDashboard = () => {
-  // Mock data - in real implementation, this would come from your backend
+  // Mock data - in real implementation, this would come from your backend real data
   const analyticsData = [
     { name: "Mon", visitors: 120, views: 180 },
     { name: "Tue", visitors: 150, views: 220 },
