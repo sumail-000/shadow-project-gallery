@@ -105,6 +105,42 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_content: {
+        Row: {
+          created_at: string
+          description: string
+          email_url: string | null
+          github_url: string | null
+          id: string
+          linkedin_url: string | null
+          main_heading: string
+          subtitle: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          email_url?: string | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          main_heading?: string
+          subtitle?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          email_url?: string | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          main_heading?: string
+          subtitle?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portfolio_settings: {
         Row: {
           contact_email: string

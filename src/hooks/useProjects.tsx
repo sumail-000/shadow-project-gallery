@@ -67,9 +67,63 @@ export const useProjects = () => {
     }
   };
 
+  const updateProject = async (id: string, project: Omit<Project, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .update(project)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setProjects(prev => prev.map(p => p.id === id ? data : p));
+      toast({
+        title: "Success",
+        description: "Project updated successfully",
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update project",
+        variant: "destructive",
+      });
+      return { success: false };
+    }
+  };
+
+  const deleteProject = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setProjects(prev => prev.filter(p => p.id !== id));
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive",
+      });
+      return { success: false };
+    }
+  };
+
   useEffect(() => {
     fetchProjects();
   }, []);
 
-  return { projects, loading, addProject, refetch: fetchProjects };
+  return { projects, loading, addProject, updateProject, deleteProject, refetch: fetchProjects };
 };

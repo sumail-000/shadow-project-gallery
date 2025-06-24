@@ -1,10 +1,11 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useHeroContent } from "@/hooks/useHeroContent";
 
 export const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { heroContent } = useHeroContent();
   const [typedText, setTypedText] = useState("");
   const [showCursor, setShowCursor] = useState(true);
   const [showSubtitle, setShowSubtitle] = useState(false);
@@ -13,9 +14,18 @@ export const Hero = () => {
   const [showSocials, setShowSocials] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
   
-  const fullText = "Full Stack Developer";
+  const fullText = heroContent?.main_heading || "Full Stack Developer";
 
   useEffect(() => {
+    // Reset animation states when heroContent changes
+    setTypedText("");
+    setShowCursor(true);
+    setShowSubtitle(false);
+    setShowDescription(false);
+    setShowButtons(false);
+    setShowSocials(false);
+    setShowScroll(false);
+
     // Typing animation
     let index = 0;
     const typingInterval = setInterval(() => {
@@ -36,7 +46,7 @@ export const Hero = () => {
     }, 100);
 
     return () => clearInterval(typingInterval);
-  }, []);
+  }, [fullText]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -167,7 +177,7 @@ export const Hero = () => {
         {showSubtitle && (
           <div className="animate-fade-in mb-8">
             <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
-              Passionate about creating <span className="text-blue-400 font-semibold">innovative solutions</span> and bringing ideas to life through code.
+              {heroContent?.subtitle || "Passionate about creating innovative solutions and bringing ideas to life through code."}
             </p>
           </div>
         )}
@@ -176,7 +186,7 @@ export const Hero = () => {
         {showDescription && (
           <div className="animate-fade-in mb-8">
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
-              Welcome to my portfolio showcasing <span className="text-purple-400 font-semibold">years of development experience</span>.
+              {heroContent?.description || "Welcome to my portfolio showcasing years of development experience."}
             </p>
           </div>
         )}
@@ -206,13 +216,22 @@ export const Hero = () => {
         {/* Social Links with fade-in animation */}
         {showSocials && (
           <div className="animate-fade-in flex justify-center space-x-8 mb-16">
-            <a href="#" className="text-gray-400 hover:text-blue-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-400/20">
+            <a 
+              href={heroContent?.github_url || "#"} 
+              className="text-gray-400 hover:text-blue-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-400/20"
+            >
               <Github size={28} />
             </a>
-            <a href="#" className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-500/20">
+            <a 
+              href={heroContent?.linkedin_url || "#"} 
+              className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-500/20"
+            >
               <Linkedin size={28} />
             </a>
-            <a href="#" className="text-gray-400 hover:text-purple-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-purple-400/20">
+            <a 
+              href={heroContent?.email_url || "#"} 
+              className="text-gray-400 hover:text-purple-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-purple-400/20"
+            >
               <Mail size={28} />
             </a>
           </div>

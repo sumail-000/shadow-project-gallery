@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,10 +7,10 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useProjects, Project } from "@/hooks/useProjects";
-import { Edit, Plus, ExternalLink, Github } from "lucide-react";
+import { Edit, Plus, ExternalLink, Github, Trash2 } from "lucide-react";
 
 export const ProjectManagement = () => {
-  const { projects, addProject } = useProjects();
+  const { projects, addProject, updateProject, deleteProject } = useProjects();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
@@ -56,13 +57,30 @@ export const ProjectManagement = () => {
     
     const technologiesArray = projectForm.technologies.split(',').map(tech => tech.trim()).filter(tech => tech);
     
-    const result = await addProject({
-      ...projectForm,
-      technologies: technologiesArray
-    });
+    let result;
+    if (isEditing && selectedProject) {
+      result = await updateProject(selectedProject.id, {
+        ...projectForm,
+        technologies: technologiesArray
+      });
+    } else {
+      result = await addProject({
+        ...projectForm,
+        technologies: technologiesArray
+      });
+    }
 
     if (result.success) {
       handleNewProject();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      const result = await deleteProject(id);
+      if (result.success && selectedProject?.id === id) {
+        handleNewProject();
+      }
     }
   };
 
@@ -207,7 +225,20 @@ export const ProjectManagement = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-white">{project.title}</h3>
-                        <span className="text-sm text-gray-400">{project.year}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-400">{project.year}</span>
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(project.id);
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 border-red-600 bg-red-900/20 text-red-400 hover:text-red-300 hover:bg-red-900/40"
+                          >
+                            <Trash2 size={12} />
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-sm text-gray-400 mb-2 line-clamp-2">
                         {project.description}

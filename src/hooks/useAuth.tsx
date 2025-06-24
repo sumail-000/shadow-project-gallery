@@ -21,9 +21,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Create super admin permissions for first user
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(async () => {
+            try {
+              const { data: existingPermissions } = await supabase
+                .from('user_permissions')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .single();
+
+              if (!existingPermissions) {
+                // Check if this is the first user
+                const { data: allUsers } = await supabase
+                  .from('user_permissions')
+                  .select('*');
+
+                const isFirstUser = !allUsers || allUsers.length === 0;
+
+                await supabase
+                  .from('user_permissions')
+                  .insert({
+                    user_id: session.user.id,
+                    analytics_read: true,
+                    analytics_write: isFirstUser,
+                    hero_read: true,
+                    hero_write: isFirstUser,
+                    projects_read: true,
+                    projects_write: isFirstUser,
+                    team_read: true,
+                    team_write: isFirstUser,
+                    settings_read: isFirstUser,
+                    settings_write: isFirstUser,
+                    is_super_admin: isFirstUser
+                  });
+              }
+            } catch (error) {
+              console.error('Error creating user permissions:', error);
+            }
+          }, 0);
+        }
+        
         setLoading(false);
       }
     );

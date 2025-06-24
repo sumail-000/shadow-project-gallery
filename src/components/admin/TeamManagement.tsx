@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,10 +7,10 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useTeamMembers, TeamMember } from "@/hooks/useTeamMembers";
-import { Edit, Plus, Github, Linkedin, Mail } from "lucide-react";
+import { Edit, Plus, Github, Linkedin, Mail, Trash2 } from "lucide-react";
 
 export const TeamManagement = () => {
-  const { teamMembers, addTeamMember } = useTeamMembers();
+  const { teamMembers, addTeamMember, updateTeamMember, deleteTeamMember } = useTeamMembers();
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
@@ -59,16 +60,32 @@ export const TeamManagement = () => {
     
     const skillsArray = teamForm.skills.split(',').map(skill => skill.trim()).filter(skill => skill);
     
-    const result = await addTeamMember({
+    const memberData = {
       ...teamForm,
       skills: skillsArray,
       github: teamForm.github || undefined,
       linkedin: teamForm.linkedin || undefined,
       email: teamForm.email || undefined
-    });
+    };
+
+    let result;
+    if (isEditing && selectedMember) {
+      result = await updateTeamMember(selectedMember.id, memberData);
+    } else {
+      result = await addTeamMember(memberData);
+    }
 
     if (result.success) {
       handleNewMember();
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this team member?')) {
+      const result = await deleteTeamMember(id);
+      if (result.success && selectedMember?.id === id) {
+        handleNewMember();
+      }
     }
   };
 
@@ -210,7 +227,20 @@ export const TeamManagement = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-semibold text-white">{member.name}</h3>
-                        <span className="text-sm text-gray-400">{member.role}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-400">{member.role}</span>
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(member.id);
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 border-red-600 bg-red-900/20 text-red-400 hover:text-red-300 hover:bg-red-900/40"
+                          >
+                            <Trash2 size={12} />
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-sm text-gray-400 mb-2 line-clamp-2">
                         {member.bio}
