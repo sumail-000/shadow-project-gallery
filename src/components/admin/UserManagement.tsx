@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UserPermissions } from '@/hooks/useUserPermissions';
@@ -32,20 +31,20 @@ export const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
-
+      // Instead of using admin.listUsers(), we'll get users from user_permissions table
+      // This approach works with regular authenticated users who have super admin permissions
       const { data: permissions, error: permError } = await supabase
         .from('user_permissions')
         .select('*');
       
       if (permError) throw permError;
 
-      const usersWithPermissions = authUsers.users.map(user => ({
-        id: user.id,
-        email: user.email || '',
-        created_at: user.created_at,
-        permissions: permissions.find(p => p.user_id === user.id)
+      // Transform the permissions data to match our User interface
+      const usersWithPermissions = permissions.map(perm => ({
+        id: perm.user_id,
+        email: `User ${perm.user_id.substring(0, 8)}...`, // We can't get email from permissions table
+        created_at: perm.created_at,
+        permissions: perm
       }));
 
       setUsers(usersWithPermissions);
@@ -53,7 +52,7 @@ export const UserManagement = () => {
       console.error('Error fetching users:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch users",
+        description: "Failed to fetch users. You may not have sufficient permissions.",
         variant: "destructive",
       });
     } finally {
@@ -61,10 +60,10 @@ export const UserManagement = () => {
     }
   };
 
-  const handleCreateUser = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log('Form submitted with data:', createUserData);
 
     if (!createUserData.email || !createUserData.password) {
       toast({
@@ -75,53 +74,54 @@ export const UserManagement = () => {
       return;
     }
 
+    if (createUserData.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setCreateUserLoading(true);
+    
     try {
-      const { data, error } = await supabase.auth.admin.createUser({
+      console.log('Creating user with email:', createUserData.email);
+      
+      // Use regular signUp instead of admin.createUser
+      const { data, error } = await supabase.auth.signUp({
         email: createUserData.email,
         password: createUserData.password,
-        email_confirm: true
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth`
+        }
       });
 
-      if (error) throw error;
-
-      // Create default permissions for the new user
-      if (data.user) {
-        const { error: permError } = await supabase
-          .from('user_permissions')
-          .insert({
-            user_id: data.user.id,
-            analytics_read: true,
-            analytics_write: false,
-            hero_read: true,
-            hero_write: false,
-            projects_read: true,
-            projects_write: false,
-            team_read: true,
-            team_write: false,
-            settings_read: false,
-            settings_write: false,
-            is_super_admin: false
-          });
-
-        if (permError) {
-          console.error('Error creating permissions:', permError);
-        }
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
       }
 
+      console.log('User created successfully:', data);
+
+      // Note: The user permissions will be automatically created by the trigger
+      // when the user confirms their email and signs in for the first time
+      
       await fetchUsers();
-      setShowCreateUserDialog(false);
+      
+      // Reset form and close dialog
       setCreateUserData({ email: '', password: '' });
+      setShowCreateUserDialog(false);
       
       toast({
         title: "Success",
-        description: "User created successfully",
+        description: "User invitation sent! They need to check their email to complete registration.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating user:', error);
       toast({
         title: "Error",
-        description: "Failed to create user",
+        description: error.message || "Failed to create user",
         variant: "destructive",
       });
     } finally {
@@ -158,19 +158,25 @@ export const UserManagement = () => {
 
   const deleteUser = async (userId: string) => {
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      // We can only delete the user permissions, not the actual user account
+      // since that requires admin privileges
+      const { error } = await supabase
+        .from('user_permissions')
+        .delete()
+        .eq('user_id', userId);
+        
       if (error) throw error;
 
       await fetchUsers();
       toast({
         title: "Success",
-        description: "User deleted successfully",
+        description: "User permissions removed successfully",
       });
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('Error removing user permissions:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user",
+        description: "Failed to remove user permissions",
         variant: "destructive",
       });
     }
@@ -204,6 +210,9 @@ export const UserManagement = () => {
             <Shield size={20} />
             Manage Permissions: {selectedUser.email}
           </DialogTitle>
+          <DialogDescription className="text-gray-400">
+            Configure user access permissions for different sections of the admin panel.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
@@ -330,6 +339,9 @@ export const UserManagement = () => {
           <UserPlus size={20} />
           Create New User
         </DialogTitle>
+        <DialogDescription className="text-gray-400">
+          Send an invitation to a new user. They will receive an email to complete their registration.
+        </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleCreateUser} className="space-y-4">
         <div className="space-y-2">
@@ -377,7 +389,7 @@ export const UserManagement = () => {
             disabled={createUserLoading}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            {createUserLoading ? 'Creating...' : 'Create User'}
+            {createUserLoading ? 'Sending Invitation...' : 'Send Invitation'}
           </Button>
         </div>
       </form>
@@ -406,7 +418,7 @@ export const UserManagement = () => {
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 <UserPlus size={16} className="mr-2" />
-                Create User
+                Invite User
               </Button>
             </DialogTrigger>
             <CreateUserDialog />
@@ -418,7 +430,7 @@ export const UserManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-gray-700">
-                <TableHead className="text-gray-300">Email</TableHead>
+                <TableHead className="text-gray-300">User ID</TableHead>
                 <TableHead className="text-gray-300">Role</TableHead>
                 <TableHead className="text-gray-300">Created</TableHead>
                 <TableHead className="text-gray-300">Actions</TableHead>
@@ -427,7 +439,9 @@ export const UserManagement = () => {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id} className="border-gray-700">
-                  <TableCell className="text-white">{user.email}</TableCell>
+                  <TableCell className="text-white font-mono text-sm">
+                    {user.id.substring(0, 8)}...
+                  </TableCell>
                   <TableCell>
                     {user.permissions?.is_super_admin ? (
                       <Badge className="bg-red-600">Super Admin</Badge>
@@ -440,12 +454,19 @@ export const UserManagement = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+                      <Dialog open={showPermissionsDialog && selectedUser?.id === user.id} 
+                             onOpenChange={(open) => {
+                               setShowPermissionsDialog(open);
+                               if (!open) setSelectedUser(null);
+                             }}>
                         <DialogTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setSelectedUser(user)}
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowPermissionsDialog(true);
+                            }}
                             className="text-blue-400 hover:text-blue-300"
                           >
                             <Edit2 size={16} />
