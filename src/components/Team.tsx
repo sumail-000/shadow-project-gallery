@@ -1,55 +1,28 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Github, Linkedin, Mail } from "lucide-react";
-
-interface TeamMember {
-  id: number;
-  name: string;
-  role: string;
-  bio: string;
-  image: string;
-  skills: string[];
-  github?: string;
-  linkedin?: string;
-  email?: string;
-}
+import { useTeamMembers } from "@/hooks/useTeamMembers";
 
 export const Team = () => {
-  const teamMembers: TeamMember[] = [
-    {
-      id: 1,
-      name: "John Doe",
-      role: "Lead Developer",
-      bio: "Full-stack developer with 5+ years of experience in React, Node.js, and cloud technologies. Passionate about creating scalable web applications.",
-      image: "/placeholder.svg",
-      skills: ["React", "Node.js", "TypeScript", "AWS"],
-      github: "https://github.com/johndoe",
-      linkedin: "https://linkedin.com/in/johndoe",
-      email: "john@example.com"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      role: "UI/UX Designer",
-      bio: "Creative designer with expertise in user experience and modern design principles. Focused on creating intuitive and beautiful interfaces.",
-      image: "/placeholder.svg",
-      skills: ["Figma", "Adobe XD", "Prototyping", "User Research"],
-      github: "https://github.com/janesmith",
-      linkedin: "https://linkedin.com/in/janesmith",
-      email: "jane@example.com"
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      role: "Backend Developer",
-      bio: "Backend specialist with deep knowledge in database design, API development, and system architecture. Loves optimizing performance.",
-      image: "/placeholder.svg",
-      skills: ["Python", "PostgreSQL", "Docker", "Kubernetes"],
-      github: "https://github.com/mikejohnson",
-      linkedin: "https://linkedin.com/in/mikejohnson",
-      email: "mike@example.com"
-    }
-  ];
+  const { teamMembers, loading } = useTeamMembers();
+
+  if (loading) {
+    return (
+      <section id="team" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+              Meet Our Team
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              The talented individuals behind our successful projects and innovations.
+            </p>
+          </div>
+          <div className="text-center text-gray-400">Loading team members...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="team" className="py-20 px-4 sm:px-6 lg:px-8">

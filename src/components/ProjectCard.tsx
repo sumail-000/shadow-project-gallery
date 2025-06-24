@@ -2,17 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Github, ExternalLink, Calendar } from "lucide-react";
-
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  technologies: string[];
-  githubUrl: string;
-  liveUrl: string;
-  year: string;
-}
+import { Project } from "@/hooks/useProjects";
 
 interface ProjectCardProps {
   project: Project;
@@ -53,7 +43,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
             size="sm"
             variant="outline"
             className="flex-1 border-gray-600 text-gray-300 hover:text-white hover:bg-gray-800"
-            onClick={() => window.open(project.githubUrl, '_blank')}
+            onClick={() => window.open(project.github_url, '_blank')}
           >
             <Github size={16} className="mr-2" />
             Code
@@ -61,7 +51,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
           <Button
             size="sm"
             className="flex-1 bg-white text-black hover:bg-gray-200"
-            onClick={() => window.open(project.liveUrl, '_blank')}
+            onClick={() => window.open(project.live_url, '_blank')}
           >
             <ExternalLink size={16} className="mr-2" />
             Live
