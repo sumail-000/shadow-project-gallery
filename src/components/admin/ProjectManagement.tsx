@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,12 +71,17 @@ export const ProjectManagement = () => {
       {/* Form Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             {isEditing ? <Edit size={20} /> : <Plus size={20} />}
             {isEditing ? 'Edit Project' : 'Add New Project'}
           </CardTitle>
           {isEditing && (
-            <Button onClick={handleNewProject} variant="outline" size="sm" className="border-gray-600">
+            <Button 
+              onClick={handleNewProject} 
+              variant="outline" 
+              size="sm" 
+              className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
+            >
               Add New
             </Button>
           )}
@@ -86,30 +90,30 @@ export const ProjectManagement = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="title">Project Title</Label>
+                <Label htmlFor="title" className="text-gray-200">Project Title</Label>
                 <Input
                   id="title"
                   value={projectForm.title}
                   onChange={(e) => setProjectForm(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter project title"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="year">Year</Label>
+                <Label htmlFor="year" className="text-gray-200">Year</Label>
                 <Input
                   id="year"
                   value={projectForm.year}
                   onChange={(e) => setProjectForm(prev => ({ ...prev, year: e.target.value }))}
                   placeholder="2024"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                   required
                 />
               </div>
             </div>
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-gray-200">Description</Label>
               <textarea
                 id="description"
                 value={projectForm.description}
@@ -121,52 +125,55 @@ export const ProjectManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="image">Image URL</Label>
+              <Label htmlFor="image" className="text-gray-200">Image URL</Label>
               <Input
                 id="image"
                 value={projectForm.image}
                 onChange={(e) => setProjectForm(prev => ({ ...prev, image: e.target.value }))}
                 placeholder="https://example.com/image.jpg"
-                className="bg-gray-800 border-gray-700"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="technologies">Technologies (comma separated)</Label>
+              <Label htmlFor="technologies" className="text-gray-200">Technologies (comma separated)</Label>
               <Input
                 id="technologies"
                 value={projectForm.technologies}
                 onChange={(e) => setProjectForm(prev => ({ ...prev, technologies: e.target.value }))}
                 placeholder="React, Node.js, MongoDB"
-                className="bg-gray-800 border-gray-700"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 required
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="github">GitHub URL</Label>
+                <Label htmlFor="github" className="text-gray-200">GitHub URL</Label>
                 <Input
                   id="github"
                   value={projectForm.github_url}
                   onChange={(e) => setProjectForm(prev => ({ ...prev, github_url: e.target.value }))}
                   placeholder="https://github.com/..."
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="live">Live URL</Label>
+                <Label htmlFor="live" className="text-gray-200">Live URL</Label>
                 <Input
                   id="live"
                   value={projectForm.live_url}
                   onChange={(e) => setProjectForm(prev => ({ ...prev, live_url: e.target.value }))}
                   placeholder="https://..."
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                   required
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200">
+            <Button 
+              type="submit" 
+              className="w-full bg-gray-800 border border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
+            >
               {isEditing ? 'Update Project' : 'Add Project'}
             </Button>
           </form>
@@ -176,7 +183,7 @@ export const ProjectManagement = () => {
       {/* Preview Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>Projects Preview ({projects.length})</CardTitle>
+          <CardTitle className="text-white">Projects Preview ({projects.length})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-96">
@@ -218,10 +225,18 @@ export const ProjectManagement = () => {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="h-6 px-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-6 px-2 border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
+                        >
                           <Github size={12} />
                         </Button>
-                        <Button size="sm" variant="outline" className="h-6 px-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-6 px-2 border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
+                        >
                           <ExternalLink size={12} />
                         </Button>
                       </div>

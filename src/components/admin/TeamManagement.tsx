@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,12 +77,17 @@ export const TeamManagement = () => {
       {/* Form Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             {isEditing ? <Edit size={20} /> : <Plus size={20} />}
             {isEditing ? 'Edit Team Member' : 'Add New Team Member'}
           </CardTitle>
           {isEditing && (
-            <Button onClick={handleNewMember} variant="outline" size="sm" className="border-gray-600">
+            <Button 
+              onClick={handleNewMember} 
+              variant="outline" 
+              size="sm" 
+              className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
+            >
               Add New
             </Button>
           )}
@@ -92,30 +96,30 @@ export const TeamManagement = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="memberName">Name</Label>
+                <Label htmlFor="memberName" className="text-gray-200">Name</Label>
                 <Input
                   id="memberName"
                   value={teamForm.name}
                   onChange={(e) => setTeamForm(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Enter team member name"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="memberRole">Role</Label>
+                <Label htmlFor="memberRole" className="text-gray-200">Role</Label>
                 <Input
                   id="memberRole"
                   value={teamForm.role}
                   onChange={(e) => setTeamForm(prev => ({ ...prev, role: e.target.value }))}
                   placeholder="Enter role"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                   required
                 />
               </div>
             </div>
             <div>
-              <Label htmlFor="memberBio">Bio</Label>
+              <Label htmlFor="memberBio" className="text-gray-200">Bio</Label>
               <textarea
                 id="memberBio"
                 value={teamForm.bio}
@@ -127,49 +131,52 @@ export const TeamManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="memberSkills">Skills (comma separated)</Label>
+              <Label htmlFor="memberSkills" className="text-gray-200">Skills (comma separated)</Label>
               <Input
                 id="memberSkills"
                 value={teamForm.skills}
                 onChange={(e) => setTeamForm(prev => ({ ...prev, skills: e.target.value }))}
                 placeholder="React, Design, Leadership"
-                className="bg-gray-800 border-gray-700"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 required
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="memberGithub">GitHub (optional)</Label>
+                <Label htmlFor="memberGithub" className="text-gray-200">GitHub (optional)</Label>
                 <Input
                   id="memberGithub"
                   value={teamForm.github}
                   onChange={(e) => setTeamForm(prev => ({ ...prev, github: e.target.value }))}
                   placeholder="https://github.com/username"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 />
               </div>
               <div>
-                <Label htmlFor="memberLinkedin">LinkedIn (optional)</Label>
+                <Label htmlFor="memberLinkedin" className="text-gray-200">LinkedIn (optional)</Label>
                 <Input
                   id="memberLinkedin"
                   value={teamForm.linkedin}
                   onChange={(e) => setTeamForm(prev => ({ ...prev, linkedin: e.target.value }))}
                   placeholder="https://linkedin.com/in/username"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 />
               </div>
               <div>
-                <Label htmlFor="memberEmail">Email (optional)</Label>
+                <Label htmlFor="memberEmail" className="text-gray-200">Email (optional)</Label>
                 <Input
                   id="memberEmail"
                   value={teamForm.email}
                   onChange={(e) => setTeamForm(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="email@example.com"
-                  className="bg-gray-800 border-gray-700"
+                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200">
+            <Button 
+              type="submit" 
+              className="w-full bg-gray-800 border border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
+            >
               {isEditing ? 'Update Team Member' : 'Add Team Member'}
             </Button>
           </form>
@@ -179,7 +186,7 @@ export const TeamManagement = () => {
       {/* Preview Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>Team Members Preview ({teamMembers.length})</CardTitle>
+          <CardTitle className="text-white">Team Members Preview ({teamMembers.length})</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <ScrollArea className="h-96">
@@ -222,17 +229,29 @@ export const TeamManagement = () => {
                       </div>
                       <div className="flex gap-2">
                         {member.github && (
-                          <Button size="sm" variant="outline" className="h-6 px-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="h-6 px-2 border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
+                          >
                             <Github size={12} />
                           </Button>
                         )}
                         {member.linkedin && (
-                          <Button size="sm" variant="outline" className="h-6 px-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="h-6 px-2 border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
+                          >
                             <Linkedin size={12} />
                           </Button>
                         )}
                         {member.email && (
-                          <Button size="sm" variant="outline" className="h-6 px-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="h-6 px-2 border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700"
+                          >
                             <Mail size={12} />
                           </Button>
                         )}

@@ -45,7 +45,7 @@ export const SettingsManagement = () => {
       {/* Form Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <Settings size={20} />
             Portfolio Settings
           </CardTitle>
@@ -53,12 +53,12 @@ export const SettingsManagement = () => {
         <CardContent>
           <form onSubmit={handleUpdateSettings} className="space-y-6">
             <div>
-              <Label htmlFor="portfolioTitle">Portfolio Title</Label>
+              <Label htmlFor="portfolioTitle" className="text-gray-200">Portfolio Title</Label>
               <Input
                 id="portfolioTitle"
                 value={settingsForm.portfolio_title}
                 onChange={(e) => setSettingsForm(prev => ({ ...prev, portfolio_title: e.target.value }))}
-                className="bg-gray-800 border-gray-700"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 required
               />
               <p className="text-sm text-gray-400 mt-1">
@@ -66,13 +66,13 @@ export const SettingsManagement = () => {
               </p>
             </div>
             <div>
-              <Label htmlFor="contactEmail">Contact Email</Label>
+              <Label htmlFor="contactEmail" className="text-gray-200">Contact Email</Label>
               <Input
                 id="contactEmail"
                 type="email"
                 value={settingsForm.contact_email}
                 onChange={(e) => setSettingsForm(prev => ({ ...prev, contact_email: e.target.value }))}
-                className="bg-gray-800 border-gray-700"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 required
               />
               <p className="text-sm text-gray-400 mt-1">
@@ -80,19 +80,22 @@ export const SettingsManagement = () => {
               </p>
             </div>
             <div>
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="text-gray-200">Phone Number</Label>
               <Input
                 id="phone"
                 value={settingsForm.phone}
                 onChange={(e) => setSettingsForm(prev => ({ ...prev, phone: e.target.value }))}
-                className="bg-gray-800 border-gray-700"
+                className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 required
               />
               <p className="text-sm text-gray-400 mt-1">
                 Contact phone number for business inquiries
               </p>
             </div>
-            <Button type="submit" className="w-full bg-white text-black hover:bg-gray-200">
+            <Button 
+              type="submit" 
+              className="w-full bg-gray-800 border border-gray-600 text-white hover:bg-gray-700 hover:border-gray-500"
+            >
               <Save size={16} className="mr-2" />
               Save Settings
             </Button>
@@ -103,7 +106,7 @@ export const SettingsManagement = () => {
       {/* Preview Section */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>Settings Preview</CardTitle>
+          <CardTitle className="text-white">Settings Preview</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">

@@ -21,13 +21,13 @@ export const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-              <p className="text-gray-400">Manage your portfolio content and settings</p>
+              <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
+              <p className="text-gray-300">Manage your portfolio content and settings</p>
             </div>
             <Button 
               onClick={handleSignOut} 
               variant="outline" 
-              className="border-gray-600 text-gray-300 hover:text-white hover:bg-gray-800"
+              className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
             >
               <LogOut size={16} className="mr-2" />
               Sign Out
@@ -41,28 +41,28 @@ export const AdminDashboard = () => {
           <TabsList className="bg-gray-900 border-gray-800 grid w-full grid-cols-4">
             <TabsTrigger 
               value="analytics" 
-              className="data-[state=active]:bg-gray-800 flex items-center gap-2"
+              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
             >
               <BarChart3 size={16} />
               Analytics
             </TabsTrigger>
             <TabsTrigger 
               value="projects" 
-              className="data-[state=active]:bg-gray-800 flex items-center gap-2"
+              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
             >
               <FolderOpen size={16} />
               Projects
             </TabsTrigger>
             <TabsTrigger 
               value="team" 
-              className="data-[state=active]:bg-gray-800 flex items-center gap-2"
+              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
             >
               <Users size={16} />
               Team
             </TabsTrigger>
             <TabsTrigger 
               value="settings" 
-              className="data-[state=active]:bg-gray-800 flex items-center gap-2"
+              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
             >
               <Settings size={16} />
               Settings

@@ -54,6 +54,57 @@ export type Database = {
         }
         Relationships: []
       }
+      dummy_analytics: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          views: number
+          visitors: number
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          views: number
+          visitors: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          views?: number
+          visitors?: number
+        }
+        Relationships: []
+      }
+      dummy_project_stats: {
+        Row: {
+          clicks: number
+          created_at: string
+          id: string
+          location: string
+          project_name: string
+          views: number
+        }
+        Insert: {
+          clicks: number
+          created_at?: string
+          id?: string
+          location: string
+          project_name: string
+          views: number
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          id?: string
+          location?: string
+          project_name?: string
+          views?: number
+        }
+        Relationships: []
+      }
       portfolio_settings: {
         Row: {
           contact_email: string

@@ -1,37 +1,79 @@
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { Users, Eye, MousePointer, TrendingUp } from "lucide-react";
+import { Users, Eye, MousePointer, TrendingUp, Database, TestTube } from "lucide-react";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export const AnalyticsDashboard = () => {
-  // Mock data for analytics
-  const analyticsData = [
-    { name: "Mon", visitors: 120, views: 180 },
-    { name: "Tue", visitors: 150, views: 220 },
-    { name: "Wed", visitors: 180, views: 280 },
-    { name: "Thu", visitors: 200, views: 320 },
-    { name: "Fri", visitors: 250, views: 400 },
-    { name: "Sat", visitors: 300, views: 450 },
-    { name: "Sun", visitors: 280, views: 420 },
-  ];
+  const [useRealData, setUseRealData] = useState(false);
+  const { 
+    realAnalyticsData, 
+    dummyAnalyticsData, 
+    realProjectStats, 
+    dummyProjectStats, 
+    isLoading 
+  } = useAnalytics();
 
-  const projectStats = [
-    { project: "E-commerce App", views: 1250, clicks: 85, location: "US: 45%, EU: 30%, Asia: 25%" },
-    { project: "Portfolio Website", views: 980, clicks: 72, location: "US: 40%, EU: 35%, Others: 25%" },
-    { project: "Task Manager", views: 750, clicks: 58, location: "US: 50%, EU: 25%, Asia: 25%" },
-    { project: "Weather App", views: 620, clicks: 41, location: "Global: 100%" },
-  ];
+  // Choose data source based on toggle
+  const analyticsData = useRealData ? realAnalyticsData : dummyAnalyticsData;
+  const projectStats = useRealData ? realProjectStats : dummyProjectStats;
+
+  // Calculate totals from current data
+  const totalVisitors = analyticsData?.reduce((sum, day) => sum + day.visitors, 0) || 0;
+  const totalViews = analyticsData?.reduce((sum, day) => sum + day.views, 0) || 0;
+  const totalClicks = projectStats?.reduce((sum, project) => sum + project.clicks, 0) || 0;
+  const growthRate = useRealData ? "+15%" : "+23%"; // Real data would calculate actual growth
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-400">Loading analytics data...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Toggle Control */}
+      <Card className="bg-gray-900 border-gray-800">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <TestTube className={`${!useRealData ? 'text-blue-400' : 'text-gray-500'}`} size={20} />
+                <Label htmlFor="data-toggle" className="text-gray-300">Dummy Data</Label>
+              </div>
+              <Switch
+                id="data-toggle"
+                checked={useRealData}
+                onCheckedChange={setUseRealData}
+                className="data-[state=checked]:bg-green-600"
+              />
+              <div className="flex items-center space-x-2">
+                <Database className={`${useRealData ? 'text-green-400' : 'text-gray-500'}`} size={20} />
+                <Label htmlFor="data-toggle" className="text-gray-300">Real Data</Label>
+              </div>
+            </div>
+            <div className="text-sm text-gray-400">
+              Currently showing: {useRealData ? 'Live Analytics' : 'Demo Data'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-gray-900 border-gray-800">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Total Visitors</p>
-                <p className="text-2xl font-bold">1,280</p>
+                <p className="text-2xl font-bold text-white">{totalVisitors.toLocaleString()}</p>
               </div>
               <Users className="text-blue-400" size={24} />
             </div>
@@ -43,7 +85,7 @@ export const AnalyticsDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Page Views</p>
-                <p className="text-2xl font-bold">2,270</p>
+                <p className="text-2xl font-bold text-white">{totalViews.toLocaleString()}</p>
               </div>
               <Eye className="text-green-400" size={24} />
             </div>
@@ -55,7 +97,7 @@ export const AnalyticsDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Project Clicks</p>
-                <p className="text-2xl font-bold">256</p>
+                <p className="text-2xl font-bold text-white">{totalClicks}</p>
               </div>
               <MousePointer className="text-purple-400" size={24} />
             </div>
@@ -67,7 +109,7 @@ export const AnalyticsDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Growth Rate</p>
-                <p className="text-2xl font-bold">+23%</p>
+                <p className="text-2xl font-bold text-white">{growthRate}</p>
               </div>
               <TrendingUp className="text-yellow-400" size={24} />
             </div>
@@ -75,10 +117,11 @@ export const AnalyticsDashboard = () => {
         </Card>
       </div>
 
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle>Visitor Analytics</CardTitle>
+            <CardTitle className="text-white">Visitor Analytics</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -90,7 +133,8 @@ export const AnalyticsDashboard = () => {
                   contentStyle={{ 
                     backgroundColor: '#1F2937', 
                     border: '1px solid #374151',
-                    borderRadius: '6px'
+                    borderRadius: '6px',
+                    color: '#FFFFFF'
                   }} 
                 />
                 <Bar dataKey="visitors" fill="#3B82F6" />
@@ -101,7 +145,7 @@ export const AnalyticsDashboard = () => {
 
         <Card className="bg-gray-900 border-gray-800">
           <CardHeader>
-            <CardTitle>Page Views Trend</CardTitle>
+            <CardTitle className="text-white">Page Views Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -113,7 +157,8 @@ export const AnalyticsDashboard = () => {
                   contentStyle={{ 
                     backgroundColor: '#1F2937', 
                     border: '1px solid #374151',
-                    borderRadius: '6px'
+                    borderRadius: '6px',
+                    color: '#FFFFFF'
                   }} 
                 />
                 <Line type="monotone" dataKey="views" stroke="#10B981" strokeWidth={2} />
@@ -123,9 +168,10 @@ export const AnalyticsDashboard = () => {
         </Card>
       </div>
 
+      {/* Project Performance Table */}
       <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>Project Performance</CardTitle>
+          <CardTitle className="text-white">Project Performance</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -138,7 +184,7 @@ export const AnalyticsDashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {projectStats.map((project, index) => (
+              {projectStats?.map((project, index) => (
                 <TableRow key={index} className="border-gray-800">
                   <TableCell className="text-white">{project.project}</TableCell>
                   <TableCell className="text-gray-300">{project.views}</TableCell>
