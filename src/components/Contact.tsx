@@ -53,12 +53,15 @@ export const Contact = () => {
             </div>
 
             <div className="flex space-x-4 pt-6">
-              <Button variant="outline" size="icon" className="border-gray-600 hover:bg-gray-800">
-                <Github size={20} />
-              </Button>
-              <Button variant="outline" size="icon" className="border-gray-600 hover:bg-gray-800">
-                <Linkedin size={20} />
-              </Button>
+              <a href="#" className="text-gray-400 hover:text-blue-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-400/20">
+                <Github size={24} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-500/20">
+                <Linkedin size={24} />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-purple-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-purple-400/20">
+                <Mail size={24} />
+              </a>
             </div>
           </div>
 

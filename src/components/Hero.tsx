@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 export const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [typedText, setTypedText] = useState("");
+  const [showCursor, setShowCursor] = useState(true);
   const [showSubtitle, setShowSubtitle] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
@@ -23,12 +24,14 @@ export const Hero = () => {
         index++;
       } else {
         clearInterval(typingInterval);
+        // Hide cursor with smooth transition after typing completes
+        setTimeout(() => setShowCursor(false), 500);
         // Sequential animations after typing is complete
-        setTimeout(() => setShowSubtitle(true), 500);
-        setTimeout(() => setShowDescription(true), 1200);
-        setTimeout(() => setShowButtons(true), 1900);
-        setTimeout(() => setShowSocials(true), 2600);
-        setTimeout(() => setShowScroll(true), 3300);
+        setTimeout(() => setShowSubtitle(true), 1000);
+        setTimeout(() => setShowDescription(true), 1700);
+        setTimeout(() => setShowButtons(true), 2400);
+        setTimeout(() => setShowSocials(true), 3100);
+        setTimeout(() => setShowScroll(true), 3800);
       }
     }, 100);
 
@@ -150,7 +153,13 @@ export const Hero = () => {
         <div className="relative mb-6">
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent min-h-[120px] flex items-center justify-center">
             {typedText}
-            <span className="animate-pulse text-blue-400">|</span>
+            <span 
+              className={`text-blue-400 transition-all duration-500 ${
+                showCursor ? 'animate-pulse opacity-100' : 'opacity-0'
+              }`}
+            >
+              |
+            </span>
           </h1>
         </div>
         
