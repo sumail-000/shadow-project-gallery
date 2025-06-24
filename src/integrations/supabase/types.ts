@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string
@@ -27,6 +54,39 @@ export type Database = {
           email?: string
           id?: string
           password_hash?: string
+        }
+        Relationships: []
+      }
+      admin_users_extended: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          last_login: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          last_login?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -243,6 +303,60 @@ export type Database = {
           role?: string
           skills?: string[]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_permissions: {
+        Row: {
+          analytics_read: boolean
+          analytics_write: boolean
+          created_at: string
+          hero_read: boolean
+          hero_write: boolean
+          id: string
+          is_super_admin: boolean
+          projects_read: boolean
+          projects_write: boolean
+          settings_read: boolean
+          settings_write: boolean
+          team_read: boolean
+          team_write: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analytics_read?: boolean
+          analytics_write?: boolean
+          created_at?: string
+          hero_read?: boolean
+          hero_write?: boolean
+          id?: string
+          is_super_admin?: boolean
+          projects_read?: boolean
+          projects_write?: boolean
+          settings_read?: boolean
+          settings_write?: boolean
+          team_read?: boolean
+          team_write?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analytics_read?: boolean
+          analytics_write?: boolean
+          created_at?: string
+          hero_read?: boolean
+          hero_write?: boolean
+          id?: string
+          is_super_admin?: boolean
+          projects_read?: boolean
+          projects_write?: boolean
+          settings_read?: boolean
+          settings_write?: boolean
+          team_read?: boolean
+          team_write?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
