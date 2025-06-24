@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Key, Users, LogOut, Shield, Eye, Edit } from "lucide-react";
-import { UserManagement } from "./UserManagement";
+import { Settings, Key, Users, LogOut, Shield, Eye, Edit, Trash2 } from "lucide-react";
 
 export const AdminSettingsManagement = () => {
   const { signOut } = useAuth();
@@ -164,7 +165,21 @@ export const AdminSettingsManagement = () => {
 
         {permissions?.is_super_admin && (
           <TabsContent value="users" className="space-y-6">
-            <UserManagement />
+            <Card className="bg-gray-900 border-gray-800">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Users size={20} />
+                  User Permissions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-400">
+                  <Users size={48} className="mx-auto mb-4" />
+                  <p>User management functionality will be implemented here.</p>
+                  <p className="text-sm mt-2">This will include creating users, managing permissions, and role assignments.</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         )}
 

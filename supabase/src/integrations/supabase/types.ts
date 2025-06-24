@@ -365,10 +365,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_super_admin: {
-        Args: { user_uuid?: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

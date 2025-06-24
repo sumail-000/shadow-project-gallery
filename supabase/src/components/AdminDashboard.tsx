@@ -1,7 +1,14 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BarChart3, FolderOpen, Users, Settings, Home, LogOut, Shield } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator 
+} from "@/components/ui/dropdown-menu";
+import { BarChart3, FolderOpen, Users, Settings, Home, LogOut, Key, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { ProjectManagement } from "./admin/ProjectManagement";
@@ -65,16 +72,47 @@ export const AdminDashboard = () => {
               <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
               <p className="text-gray-300">Manage your portfolio content and settings</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setShowAdminSettings(true)}
-                variant="outline"
-                className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
+                >
+                  <Settings size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="bg-gray-800 border-gray-700 text-white"
               >
-                <Settings size={16} className="mr-2" />
-                Admin Settings
-              </Button>
-            </div>
+                <DropdownMenuItem 
+                  onClick={() => setShowAdminSettings(true)}
+                  className="hover:bg-gray-700 cursor-pointer"
+                >
+                  <Settings size={16} className="mr-2" />
+                  Admin Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                  <Key size={16} className="mr-2" />
+                  Change Password
+                </DropdownMenuItem>
+                {permissions?.is_super_admin && (
+                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    <Shield size={16} className="mr-2" />
+                    User Management
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator className="bg-gray-700" />
+                <DropdownMenuItem 
+                  onClick={handleSignOut}
+                  className="hover:bg-red-700 cursor-pointer text-red-400 hover:text-red-300"
+                >
+                  <LogOut size={16} className="mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -171,18 +209,6 @@ export const AdminDashboard = () => {
             <SettingsManagement />
           </TabsContent>
         </Tabs>
-
-        {/* Bottom Logout Button */}
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <Button 
-            onClick={handleSignOut}
-            variant="outline"
-            className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white hover:border-red-500"
-          >
-            <LogOut size={16} className="mr-2" />
-            Sign Out
-          </Button>
-        </div>
       </div>
     </div>
   );
