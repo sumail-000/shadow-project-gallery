@@ -1,10 +1,39 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowDown, Github, Linkedin, Mail } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [typedText, setTypedText] = useState("");
+  const [showSubtitle, setShowSubtitle] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
+  const [showSocials, setShowSocials] = useState(false);
+  const [showScroll, setShowScroll] = useState(false);
+  
+  const fullText = "Full Stack Developer";
+
+  useEffect(() => {
+    // Typing animation
+    let index = 0;
+    const typingInterval = setInterval(() => {
+      if (index < fullText.length) {
+        setTypedText(fullText.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(typingInterval);
+        // Sequential animations after typing is complete
+        setTimeout(() => setShowSubtitle(true), 500);
+        setTimeout(() => setShowDescription(true), 1200);
+        setTimeout(() => setShowButtons(true), 1900);
+        setTimeout(() => setShowSocials(true), 2600);
+        setTimeout(() => setShowScroll(true), 3300);
+      }
+    }, 100);
+
+    return () => clearInterval(typingInterval);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -116,31 +145,36 @@ export const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/80 z-10"></div>
       <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-transparent to-purple-900/20 z-10"></div>
 
-      <div className="max-w-4xl mx-auto text-center relative z-20">
-        <div className="animate-fade-in">
-          {/* Glowing Title */}
-          <div className="relative mb-6">
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent relative">
-              Full Stack Developer
-              <div className="absolute inset-0 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent blur-sm opacity-50 animate-pulse"></div>
-            </h1>
-            
-            {/* Animated underline */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-0 h-1 bg-gradient-to-r from-blue-400 to-purple-400 animate-expand-width"></div>
-          </div>
-          
-          {/* Enhanced Description */}
-          <div className="relative mb-8">
+      <div className="max-w-4xl mx-auto text-center relative z-20 pb-32">
+        {/* Typing Animation Title */}
+        <div className="relative mb-6">
+          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent min-h-[120px] flex items-center justify-center">
+            {typedText}
+            <span className="animate-pulse text-blue-400">|</span>
+          </h1>
+        </div>
+        
+        {/* Subtitle with fade-in animation */}
+        {showSubtitle && (
+          <div className="animate-fade-in mb-8">
             <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
               Passionate about creating <span className="text-blue-400 font-semibold">innovative solutions</span> and bringing ideas to life through code.
             </p>
+          </div>
+        )}
+        
+        {/* Description with fade-in animation */}
+        {showDescription && (
+          <div className="animate-fade-in mb-8">
             <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
               Welcome to my portfolio showcasing <span className="text-purple-400 font-semibold">years of development experience</span>.
             </p>
           </div>
-          
-          {/* Enhanced Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+        )}
+        
+        {/* Buttons with fade-in animation */}
+        {showButtons && (
+          <div className="animate-fade-in flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-blue-500/25 transform hover:scale-105 relative overflow-hidden group"
@@ -158,9 +192,11 @@ export const Hero = () => {
               Get In Touch
             </Button>
           </div>
+        )}
 
-          {/* Enhanced Social Links */}
-          <div className="flex justify-center space-x-8 mb-16">
+        {/* Social Links with fade-in animation */}
+        {showSocials && (
+          <div className="animate-fade-in flex justify-center space-x-8 mb-16">
             <a href="#" className="text-gray-400 hover:text-blue-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-400/20">
               <Github size={28} />
             </a>
@@ -171,10 +207,12 @@ export const Hero = () => {
               <Mail size={28} />
             </a>
           </div>
-        </div>
+        )}
+      </div>
 
-        {/* Enhanced Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+      {/* Enhanced Scroll Indicator - Fixed positioning */}
+      {showScroll && (
+        <div className="animate-fade-in absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30">
           <div className="animate-bounce">
             <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
               <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
@@ -182,7 +220,7 @@ export const Hero = () => {
             <ArrowDown className="text-gray-400 mx-auto mt-2" size={20} />
           </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };
