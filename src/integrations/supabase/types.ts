@@ -365,6 +365,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_current_user_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_super_admin: {
         Args: { user_uuid?: string }
         Returns: boolean

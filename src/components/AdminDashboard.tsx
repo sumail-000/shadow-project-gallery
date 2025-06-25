@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BarChart3, FolderOpen, Users, Settings, Home, LogOut, Shield } from "lucide-react";
+import { BarChart3, FolderOpen, Users, Settings, Home, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { ProjectManagement } from "./admin/ProjectManagement";
@@ -128,7 +128,7 @@ export const AdminDashboard = () => {
               <AnalyticsDashboard />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <Shield size={48} className="mx-auto mb-4" />
+                <BarChart3 size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view analytics.</p>
               </div>
             )}
@@ -139,7 +139,7 @@ export const AdminDashboard = () => {
               <HeroManagement />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <Shield size={48} className="mx-auto mb-4" />
+                <Home size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view hero management.</p>
               </div>
             )}
@@ -150,7 +150,7 @@ export const AdminDashboard = () => {
               <ProjectManagement />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <Shield size={48} className="mx-auto mb-4" />
+                <FolderOpen size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view project management.</p>
               </div>
             )}
@@ -161,7 +161,7 @@ export const AdminDashboard = () => {
               <TeamManagement />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <Shield size={48} className="mx-auto mb-4" />
+                <Users size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view team management.</p>
               </div>
             )}

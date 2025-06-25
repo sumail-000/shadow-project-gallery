@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Key, Users, LogOut, Shield, Eye, Edit } from "lucide-react";
-import { UserManagement } from "./UserManagement";
+import { Settings, Key, LogOut, Shield, Eye, Edit } from "lucide-react";
 
 export const AdminSettingsManagement = () => {
   const { signOut } = useAuth();
@@ -82,15 +82,6 @@ export const AdminSettingsManagement = () => {
             <Key size={16} />
             Security
           </TabsTrigger>
-          {permissions?.is_super_admin && (
-            <TabsTrigger 
-              value="users" 
-              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
-            >
-              <Users size={16} />
-              User Management
-            </TabsTrigger>
-          )}
           <TabsTrigger 
             value="general" 
             className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
@@ -161,12 +152,6 @@ export const AdminSettingsManagement = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
-        {permissions?.is_super_admin && (
-          <TabsContent value="users" className="space-y-6">
-            <UserManagement />
-          </TabsContent>
-        )}
 
         <TabsContent value="general" className="space-y-6">
           <Card className="bg-gray-900 border-gray-800">
