@@ -12,6 +12,19 @@ export interface Project {
   github_url: string;
   live_url: string;
   year: string;
+  detailed_description?: string;
+  goals?: string[];
+  objectives?: string[];
+  features?: string[];
+  challenges?: string[];
+  solutions?: string[];
+  gallery_images?: string[];
+  demo_video_url?: string;
+  project_duration?: string;
+  team_size?: number;
+  project_status?: string;
+  client_name?: string;
+  project_category?: string;
 }
 
 export const useProjects = () => {

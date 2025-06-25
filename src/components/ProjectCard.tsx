@@ -1,14 +1,17 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Github, ExternalLink, Calendar } from "lucide-react";
+import { Github, ExternalLink, Calendar, Eye } from "lucide-react";
 import { Project } from "@/hooks/useProjects";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
   project: Project;
 }
 
 export const ProjectCard = ({ project }: ProjectCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="bg-gray-900 border-gray-800 hover:border-gray-700 transition-all duration-300 hover:scale-105 group">
       <div className="relative overflow-hidden">
@@ -57,6 +60,15 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
             Live
           </Button>
         </div>
+        
+        <Button
+          onClick={() => navigate(`/project/${project.id}`)}
+          variant="ghost"
+          className="w-full mt-3 text-blue-400 hover:text-blue-300 hover:bg-gray-800"
+        >
+          <Eye size={16} className="mr-2" />
+          View Details
+        </Button>
       </CardContent>
     </Card>
   );

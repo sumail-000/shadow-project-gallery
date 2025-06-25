@@ -227,36 +227,75 @@ export type Database = {
       }
       projects: {
         Row: {
+          challenges: string[] | null
+          client_name: string | null
           created_at: string
+          demo_video_url: string | null
           description: string
+          detailed_description: string | null
+          features: string[] | null
+          gallery_images: string[] | null
           github_url: string
+          goals: string[] | null
           id: string
           image: string
           live_url: string
+          objectives: string[] | null
+          project_category: string | null
+          project_duration: string | null
+          project_status: string | null
+          solutions: string[] | null
+          team_size: number | null
           technologies: string[]
           title: string
           updated_at: string
           year: string
         }
         Insert: {
+          challenges?: string[] | null
+          client_name?: string | null
           created_at?: string
+          demo_video_url?: string | null
           description: string
+          detailed_description?: string | null
+          features?: string[] | null
+          gallery_images?: string[] | null
           github_url: string
+          goals?: string[] | null
           id?: string
           image: string
           live_url: string
+          objectives?: string[] | null
+          project_category?: string | null
+          project_duration?: string | null
+          project_status?: string | null
+          solutions?: string[] | null
+          team_size?: number | null
           technologies?: string[]
           title: string
           updated_at?: string
           year: string
         }
         Update: {
+          challenges?: string[] | null
+          client_name?: string | null
           created_at?: string
+          demo_video_url?: string | null
           description?: string
+          detailed_description?: string | null
+          features?: string[] | null
+          gallery_images?: string[] | null
           github_url?: string
+          goals?: string[] | null
           id?: string
           image?: string
           live_url?: string
+          objectives?: string[] | null
+          project_category?: string | null
+          project_duration?: string | null
+          project_status?: string | null
+          solutions?: string[] | null
+          team_size?: number | null
           technologies?: string[]
           title?: string
           updated_at?: string
