@@ -72,12 +72,10 @@ export const AdminSettingsManagement = () => {
     );
   }
 
-  const tabCount = permissions?.is_super_admin ? 3 : 2;
-
   return (
     <div className="space-y-6">
       <Tabs defaultValue="security" className="space-y-6">
-        <TabsList className={`bg-gray-900 border-gray-800 grid w-full grid-cols-${tabCount}`}>
+        <TabsList className="bg-gray-900 border-gray-800 w-full justify-start">
           <TabsTrigger 
             value="security" 
             className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
@@ -175,7 +173,7 @@ export const AdminSettingsManagement = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-gray-300">Analytics</Label>
                     <div className="flex gap-2">
