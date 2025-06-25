@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,11 +20,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
-        // Create super admin permissions for first user
+        // This logic conflicts with RLS policies and should be handled manually by a super admin.
+        // A new user cannot create their own permissions because the RLS policy requires
+        // the user to already be a super admin to write to the user_permissions table.
+        /*
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(async () => {
             try {
@@ -65,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           }, 0);
         }
+        */
         
         setLoading(false);
       }

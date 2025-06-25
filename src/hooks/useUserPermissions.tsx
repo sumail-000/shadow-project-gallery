@@ -75,15 +75,51 @@ export const useUserPermissions = () => {
 
   const updatePermissions = async (userId: string, updates: Partial<UserPermissions>) => {
     try {
-      const { data, error } = await supabase
+      console.log('Updating permissions for user:', userId, 'with updates:', updates);
+      
+      // First check if permissions exist for this user
+      const { data: existingPermissions, error: checkError } = await supabase
         .from('user_permissions')
-        .update(updates)
+        .select('*')
         .eq('user_id', userId)
-        .select()
         .single();
 
-      if (error) throw error;
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing permissions:', checkError);
+        throw checkError;
+      }
 
+      let result;
+      
+      if (!existingPermissions) {
+        // Create new permissions if they don't exist
+        console.log('Creating new permissions for user:', userId);
+        result = await supabase
+          .from('user_permissions')
+          .insert({ user_id: userId, ...updates })
+          .select()
+          .single();
+      } else {
+        // Update existing permissions
+        console.log('Updating existing permissions for user:', userId);
+        result = await supabase
+          .from('user_permissions')
+          .update(updates)
+          .eq('user_id', userId)
+          .select()
+          .single();
+      }
+
+      const { data, error } = result;
+
+      if (error) {
+        console.error('Error in updatePermissions:', error);
+        throw error;
+      }
+
+      console.log('Successfully updated permissions:', data);
+
+      // Update local state if this is the current user
       if (userId === user?.id) {
         setPermissions(data);
       }

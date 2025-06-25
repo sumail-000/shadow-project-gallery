@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPermissions } from '@/hooks/useUserPermissions';
+import { UserPermissions, useUserPermissions as usePermissionsHook } from '@/hooks/useUserPermissions';
 import { Users, Plus, Edit2, Trash2, Shield, UserPlus } from 'lucide-react';
 
 interface User {
@@ -28,6 +28,7 @@ export const UserManagement = () => {
   const [createUserData, setCreateUserData] = useState({ email: '', password: '' });
   const [createUserLoading, setCreateUserLoading] = useState(false);
   const { toast } = useToast();
+  const { updatePermissions: hookUpdatePermissions } = usePermissionsHook();
 
   const fetchUsers = async () => {
     try {
@@ -129,25 +130,15 @@ export const UserManagement = () => {
     }
   };
 
-  const updateUserPermissions = async (userId: string, updates: Partial<UserPermissions>) => {
-    try {
-      const { error } = await supabase
-        .from('user_permissions')
-        .upsert({
-          user_id: userId,
-          ...updates,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
+  const handlePermissionChange = async (userId: string, updates: Partial<UserPermissions>) => {
+    const { success } = await hookUpdatePermissions(userId, updates);
+    if (success) {
       await fetchUsers();
       toast({
         title: "Success",
         description: "User permissions updated successfully",
       });
-    } catch (error) {
-      console.error('Error updating permissions:', error);
+    } else {
       toast({
         title: "Error",
         description: "Failed to update user permissions",
@@ -224,7 +215,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.analytics_read || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, analytics_read: checked })
+                      handlePermissionChange(selectedUser.id, { analytics_read: checked })
                     }
                   />
                 </div>
@@ -233,7 +224,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.analytics_write || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, analytics_write: checked })
+                      handlePermissionChange(selectedUser.id, { analytics_write: checked })
                     }
                   />
                 </div>
@@ -248,7 +239,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.hero_read || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, hero_read: checked })
+                      handlePermissionChange(selectedUser.id, { hero_read: checked })
                     }
                   />
                 </div>
@@ -257,7 +248,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.hero_write || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, hero_write: checked })
+                      handlePermissionChange(selectedUser.id, { hero_write: checked })
                     }
                   />
                 </div>
@@ -272,7 +263,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.projects_read || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, projects_read: checked })
+                      handlePermissionChange(selectedUser.id, { projects_read: checked })
                     }
                   />
                 </div>
@@ -281,7 +272,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.projects_write || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, projects_write: checked })
+                      handlePermissionChange(selectedUser.id, { projects_write: checked })
                     }
                   />
                 </div>
@@ -296,7 +287,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.team_read || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, team_read: checked })
+                      handlePermissionChange(selectedUser.id, { team_read: checked })
                     }
                   />
                 </div>
@@ -305,7 +296,7 @@ export const UserManagement = () => {
                   <Switch
                     checked={permissions.team_write || false}
                     onCheckedChange={(checked) => 
-                      updateUserPermissions(selectedUser.id, { ...permissions, team_write: checked })
+                      handlePermissionChange(selectedUser.id, { team_write: checked })
                     }
                   />
                 </div>
@@ -322,7 +313,7 @@ export const UserManagement = () => {
               <Switch
                 checked={permissions.is_super_admin || false}
                 onCheckedChange={(checked) => 
-                  updateUserPermissions(selectedUser.id, { ...permissions, is_super_admin: checked })
+                  handlePermissionChange(selectedUser.id, { is_super_admin: checked })
                 }
               />
             </div>
