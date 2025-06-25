@@ -1,7 +1,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BarChart3, FolderOpen, Users, Settings, Home, LogOut } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { BarChart3, FolderOpen, Users, Settings, Home, LogOut, Key, Shield, Code2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { ProjectManagement } from "./admin/ProjectManagement";
@@ -10,6 +11,7 @@ import { SettingsManagement } from "./admin/SettingsManagement";
 import { AnalyticsDashboard } from "./admin/AnalyticsDashboard";
 import { HeroManagement } from "./admin/HeroManagement";
 import { AdminSettingsManagement } from "./admin/AdminSettingsManagement";
+import { SkillsManagement } from "./admin/SkillsManagement";
 import { useState } from "react";
 
 export const AdminDashboard = () => {
@@ -65,23 +67,54 @@ export const AdminDashboard = () => {
               <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
               <p className="text-gray-300">Manage your portfolio content and settings</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setShowAdminSettings(true)}
-                variant="outline"
-                className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="border-gray-600 bg-gray-800 text-gray-300 hover:text-white hover:bg-gray-700 hover:border-gray-500"
+                >
+                  <Settings size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="bg-gray-800 border-gray-700 text-white"
               >
-                <Settings size={16} className="mr-2" />
-                Admin Settings
-              </Button>
-            </div>
+                <DropdownMenuItem 
+                  onClick={() => setShowAdminSettings(true)}
+                  className="hover:bg-gray-700 cursor-pointer"
+                >
+                  <Settings size={16} className="mr-2" />
+                  Admin Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                  <Key size={16} className="mr-2" />
+                  Change Password
+                </DropdownMenuItem>
+                {permissions?.is_super_admin && (
+                  <DropdownMenuItem className="hover:bg-gray-700 cursor-pointer">
+                    <Shield size={16} className="mr-2" />
+                    User Management
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator className="bg-gray-700" />
+                <DropdownMenuItem 
+                  onClick={handleSignOut}
+                  className="hover:bg-red-700 cursor-pointer text-red-400 hover:text-red-300"
+                >
+                  <LogOut size={16} className="mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="bg-gray-900 border-gray-800 grid w-full grid-cols-5">
+          <TabsList className="bg-gray-900 border-gray-800 grid w-full grid-cols-6">
             <TabsTrigger 
               value="analytics" 
               className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
@@ -115,6 +148,13 @@ export const AdminDashboard = () => {
               Team
             </TabsTrigger>
             <TabsTrigger 
+              value="skills" 
+              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
+            >
+              <Code2 size={16} />
+              Skills
+            </TabsTrigger>
+            <TabsTrigger 
               value="settings" 
               className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
             >
@@ -128,7 +168,7 @@ export const AdminDashboard = () => {
               <AnalyticsDashboard />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <BarChart3 size={48} className="mx-auto mb-4" />
+                <Shield size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view analytics.</p>
               </div>
             )}
@@ -139,7 +179,7 @@ export const AdminDashboard = () => {
               <HeroManagement />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <Home size={48} className="mx-auto mb-4" />
+                <Shield size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view hero management.</p>
               </div>
             )}
@@ -150,7 +190,7 @@ export const AdminDashboard = () => {
               <ProjectManagement />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <FolderOpen size={48} className="mx-auto mb-4" />
+                <Shield size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view project management.</p>
               </div>
             )}
@@ -161,28 +201,20 @@ export const AdminDashboard = () => {
               <TeamManagement />
             ) : (
               <div className="text-center py-12 text-gray-400">
-                <Users size={48} className="mx-auto mb-4" />
+                <Shield size={48} className="mx-auto mb-4" />
                 <p>You don't have permission to view team management.</p>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="skills" className="space-y-6">
+            <SkillsManagement />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
             <SettingsManagement />
           </TabsContent>
         </Tabs>
-
-        {/* Bottom Logout Button */}
-        <div className="mt-8 pt-6 border-t border-gray-800">
-          <Button 
-            onClick={handleSignOut}
-            variant="outline"
-            className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white hover:border-red-500"
-          >
-            <LogOut size={16} className="mr-2" />
-            Sign Out
-          </Button>
-        </div>
       </div>
     </div>
   );

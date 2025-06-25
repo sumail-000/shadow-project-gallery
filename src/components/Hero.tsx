@@ -13,6 +13,7 @@ export const Hero = () => {
   const [showButtons, setShowButtons] = useState(false);
   const [showSocials, setShowSocials] = useState(false);
   const [showScroll, setShowScroll] = useState(false);
+  const [typingComplete, setTypingComplete] = useState(false);
   
   const fullText = heroContent?.main_heading || "Full Stack Developer";
 
@@ -25,6 +26,7 @@ export const Hero = () => {
     setShowButtons(false);
     setShowSocials(false);
     setShowScroll(false);
+    setTypingComplete(false);
 
     // Typing animation
     let index = 0;
@@ -34,14 +36,19 @@ export const Hero = () => {
         index++;
       } else {
         clearInterval(typingInterval);
-        // Hide cursor with smooth transition after typing completes
-        setTimeout(() => setShowCursor(false), 500);
-        // Sequential animations after typing is complete
-        setTimeout(() => setShowSubtitle(true), 1000);
-        setTimeout(() => setShowDescription(true), 1700);
-        setTimeout(() => setShowButtons(true), 2400);
-        setTimeout(() => setShowSocials(true), 3100);
-        setTimeout(() => setShowScroll(true), 3800);
+        setTypingComplete(true);
+        
+        // Smooth cursor fade-out after a brief pause
+        setTimeout(() => {
+          setShowCursor(false);
+        }, 800);
+        
+        // Sequential animations with smoother timing
+        setTimeout(() => setShowSubtitle(true), 1200);
+        setTimeout(() => setShowDescription(true), 1600);
+        setTimeout(() => setShowButtons(true), 2000);
+        setTimeout(() => setShowSocials(true), 2400);
+        setTimeout(() => setShowScroll(true), 2800);
       }
     }, 100);
 
@@ -159,13 +166,13 @@ export const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-r from-blue-900/20 via-transparent to-purple-900/20 z-10"></div>
 
       <div className="max-w-4xl mx-auto text-center relative z-20 pb-32">
-        {/* Typing Animation Title */}
+        {/* Typing Animation Title with reserved space */}
         <div className="relative mb-6">
           <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent min-h-[120px] flex items-center justify-center">
             {typedText}
             <span 
-              className={`text-blue-400 transition-all duration-500 ${
-                showCursor ? 'animate-pulse opacity-100' : 'opacity-0'
+              className={`text-blue-400 ml-1 transition-opacity duration-500 ease-out ${
+                showCursor ? 'opacity-100 animate-pulse' : 'opacity-0'
               }`}
             >
               |
@@ -173,74 +180,91 @@ export const Hero = () => {
           </h1>
         </div>
         
-        {/* Subtitle with fade-in animation */}
-        {showSubtitle && (
-          <div className="animate-fade-in mb-8">
-            <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
-              {heroContent?.subtitle || "Passionate about creating innovative solutions and bringing ideas to life through code."}
-            </p>
+        {/* Pre-reserved space container to prevent layout shifts */}
+        <div className="space-y-8">
+          {/* Subtitle with smooth fade-in and reserved space */}
+          <div className={`transition-all duration-700 ease-out ${
+            showSubtitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`} style={{ minHeight: showSubtitle ? 'auto' : '60px' }}>
+            {showSubtitle && (
+              <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
+                {heroContent?.subtitle || "Passionate about creating innovative solutions and bringing ideas to life through code."}
+              </p>
+            )}
           </div>
-        )}
-        
-        {/* Description with fade-in animation */}
-        {showDescription && (
-          <div className="animate-fade-in mb-8">
-            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
-              {heroContent?.description || "Welcome to my portfolio showcasing years of development experience."}
-            </p>
+          
+          {/* Description with smooth fade-in and reserved space */}
+          <div className={`transition-all duration-700 ease-out ${
+            showDescription ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`} style={{ minHeight: showDescription ? 'auto' : '40px' }}>
+            {showDescription && (
+              <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto">
+                {heroContent?.description || "Welcome to my portfolio showcasing years of development experience."}
+              </p>
+            )}
           </div>
-        )}
-        
-        {/* Buttons with fade-in animation */}
-        {showButtons && (
-          <div className="animate-fade-in flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-blue-500/25 transform hover:scale-105 relative overflow-hidden group"
-              onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              <span className="relative z-10">View My Work</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="border-2 border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 font-semibold px-8 py-4 text-lg backdrop-blur-sm bg-white/10 shadow-lg hover:shadow-white/25 transform hover:scale-105"
-              onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Get In Touch
-            </Button>
+          
+          {/* Buttons with smooth fade-in and reserved space */}
+          <div className={`transition-all duration-700 ease-out ${
+            showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`} style={{ minHeight: showButtons ? 'auto' : '80px' }}>
+            {showButtons && (
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-blue-500/25 transform hover:scale-105 relative overflow-hidden group"
+                  onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  <span className="relative z-10">View My Work</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-2 border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 font-semibold px-8 py-4 text-lg backdrop-blur-sm bg-white/10 shadow-lg hover:shadow-white/25 transform hover:scale-105"
+                  onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Get In Touch
+                </Button>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* Social Links with fade-in animation */}
-        {showSocials && (
-          <div className="animate-fade-in flex justify-center space-x-8 mb-16">
-            <a 
-              href={heroContent?.github_url || "#"} 
-              className="text-gray-400 hover:text-blue-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-400/20"
-            >
-              <Github size={28} />
-            </a>
-            <a 
-              href={heroContent?.linkedin_url || "#"} 
-              className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-500/20"
-            >
-              <Linkedin size={28} />
-            </a>
-            <a 
-              href={heroContent?.email_url || "#"} 
-              className="text-gray-400 hover:text-purple-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-purple-400/20"
-            >
-              <Mail size={28} />
-            </a>
+          {/* Social Links with smooth fade-in and reserved space */}
+          <div className={`transition-all duration-700 ease-out ${
+            showSocials ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`} style={{ minHeight: showSocials ? 'auto' : '80px' }}>
+            {showSocials && (
+              <div className="flex justify-center space-x-8 mb-16">
+                <a 
+                  href={heroContent?.github_url || "#"} 
+                  className="text-gray-400 hover:text-blue-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-400/20"
+                >
+                  <Github size={28} />
+                </a>
+                <a 
+                  href={heroContent?.linkedin_url || "#"} 
+                  className="text-gray-400 hover:text-blue-500 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-blue-500/20"
+                >
+                  <Linkedin size={28} />
+                </a>
+                <a 
+                  href={heroContent?.email_url || "#"} 
+                  className="text-gray-400 hover:text-purple-400 transition-all duration-300 transform hover:scale-125 hover:rotate-12 p-3 rounded-full bg-white/5 backdrop-blur-sm hover:bg-purple-400/20"
+                >
+                  <Mail size={28} />
+                </a>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Enhanced Scroll Indicator - Fixed positioning */}
       {showScroll && (
-        <div className="animate-fade-in absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30">
+        <div className={`absolute bottom-6 left-1/2 transform -translate-x-1/2 z-30 transition-all duration-700 ease-out ${
+          showScroll ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}>
           <div className="animate-bounce">
             <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
               <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>

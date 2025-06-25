@@ -42,7 +42,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 border-gray-600 text-gray-300 hover:text-white hover:bg-gray-800"
+            className="flex-1 border-gray-500 bg-gray-800 text-gray-200 hover:text-white hover:bg-gray-700 hover:border-gray-400"
             onClick={() => window.open(project.github_url, '_blank')}
           >
             <Github size={16} className="mr-2" />
