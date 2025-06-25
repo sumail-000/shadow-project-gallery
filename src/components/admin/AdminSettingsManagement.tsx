@@ -11,7 +11,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserPermissions } from "@/hooks/useUserPermissions";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Key, LogOut, Shield, Eye, Edit } from "lucide-react";
+import { Settings, Key, LogOut, Shield, Eye, Edit, UserCog } from "lucide-react";
+import { UserManagement } from "./UserManagement";
 
 export const AdminSettingsManagement = () => {
   const { signOut } = useAuth();
@@ -71,10 +72,12 @@ export const AdminSettingsManagement = () => {
     );
   }
 
+  const tabCount = permissions?.is_super_admin ? 3 : 2;
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="security" className="space-y-6">
-        <TabsList className="bg-gray-900 border-gray-800">
+        <TabsList className={`bg-gray-900 border-gray-800 grid w-full grid-cols-${tabCount}`}>
           <TabsTrigger 
             value="security" 
             className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
@@ -89,6 +92,15 @@ export const AdminSettingsManagement = () => {
             <Settings size={16} />
             General
           </TabsTrigger>
+          {permissions?.is_super_admin && (
+            <TabsTrigger 
+              value="users" 
+              className="data-[state=active]:bg-gray-800 data-[state=active]:text-white text-gray-300 flex items-center gap-2"
+            >
+              <UserCog size={16} />
+              User Management
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="security" className="space-y-6">
@@ -251,6 +263,12 @@ export const AdminSettingsManagement = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {permissions?.is_super_admin && (
+          <TabsContent value="users" className="space-y-6">
+            <UserManagement />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

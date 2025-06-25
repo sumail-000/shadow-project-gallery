@@ -9,13 +9,15 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPermissions, useUserPermissions as usePermissionsHook } from '@/hooks/useUserPermissions';
-import { Users, Plus, Edit2, Trash2, Shield, UserPlus } from 'lucide-react';
+import { UserPermissions } from '@/hooks/useUserPermissions';
+import { Users, Plus, Edit2, Trash2, Shield, UserPlus, Mail, Calendar, Lock } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface User {
   id: string;
   email: string;
   created_at: string;
+  last_sign_in_at: string | null;
   permissions?: UserPermissions;
 }
 
@@ -28,27 +30,54 @@ export const UserManagement = () => {
   const [createUserData, setCreateUserData] = useState({ email: '', password: '' });
   const [createUserLoading, setCreateUserLoading] = useState(false);
   const { toast } = useToast();
-  const { updatePermissions: hookUpdatePermissions } = usePermissionsHook();
+  const { user: currentUser } = useAuth();
 
   const fetchUsers = async () => {
     try {
-      // Instead of using admin.listUsers(), we'll get users from user_permissions table
-      // This approach works with regular authenticated users who have super admin permissions
+      // Get all user permissions first
       const { data: permissions, error: permError } = await supabase
         .from('user_permissions')
         .select('*');
       
       if (permError) throw permError;
 
-      // Transform the permissions data to match our User interface
-      const usersWithPermissions = permissions.map(perm => ({
-        id: perm.user_id,
-        email: `User ${perm.user_id.substring(0, 8)}...`, // We can't get email from permissions table
-        created_at: perm.created_at,
-        permissions: perm
-      }));
+      // Get user emails by fetching them properly
+      const usersWithEmails = await Promise.all(
+        permissions.map(async (perm) => {
+          try {
+            // Try to get user email using our security definer function
+            const { data: emailData, error: emailError } = await supabase
+              .rpc('get_user_email', { user_uuid: perm.user_id });
+            
+            if (emailError) {
+              console.error('Error fetching user email:', emailError);
+            }
+            
+            const email = emailData && typeof emailData === 'string' 
+              ? emailData 
+              : `User ${perm.user_id.substring(0, 8)}...`;
+            
+            return {
+              id: perm.user_id,
+              email: email,
+              created_at: perm.created_at,
+              last_sign_in_at: null,
+              permissions: perm
+            };
+          } catch (error) {
+            console.error('Error fetching user email:', error);
+            return {
+              id: perm.user_id,
+              email: `User ${perm.user_id.substring(0, 8)}...`,
+              created_at: perm.created_at,
+              last_sign_in_at: null,
+              permissions: perm
+            };
+          }
+        })
+      );
 
-      setUsers(usersWithPermissions);
+      setUsers(usersWithEmails);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -64,8 +93,6 @@ export const UserManagement = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submitted with data:', createUserData);
-
     if (!createUserData.email || !createUserData.password) {
       toast({
         title: "Error",
@@ -87,9 +114,7 @@ export const UserManagement = () => {
     setCreateUserLoading(true);
     
     try {
-      console.log('Creating user with email:', createUserData.email);
-      
-      // Use regular signUp instead of admin.createUser
+      // Use regular signUp to create the user
       const { data, error } = await supabase.auth.signUp({
         email: createUserData.email,
         password: createUserData.password,
@@ -98,25 +123,40 @@ export const UserManagement = () => {
         }
       });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (error) throw error;
+
+      if (data.user) {
+        // Create default permissions for the new user
+        const { error: permError } = await supabase
+          .from('user_permissions')
+          .insert({
+            user_id: data.user.id,
+            analytics_read: true,
+            analytics_write: false,
+            hero_read: true,
+            hero_write: false,
+            projects_read: true,
+            projects_write: false,
+            team_read: true,
+            team_write: false,
+            settings_read: false,
+            settings_write: false,
+            is_super_admin: false
+          });
+
+        if (permError) {
+          console.error('Error creating permissions:', permError);
+        }
       }
-
-      console.log('User created successfully:', data);
-
-      // Note: The user permissions will be automatically created by the trigger
-      // when the user confirms their email and signs in for the first time
       
       await fetchUsers();
       
-      // Reset form and close dialog
       setCreateUserData({ email: '', password: '' });
       setShowCreateUserDialog(false);
       
       toast({
         title: "Success",
-        description: "User invitation sent! They need to check their email to complete registration.",
+        description: "User created successfully! They can now sign in with their credentials.",
       });
     } catch (error: any) {
       console.error('Error creating user:', error);
@@ -130,15 +170,46 @@ export const UserManagement = () => {
     }
   };
 
-  const handlePermissionChange = async (userId: string, updates: Partial<UserPermissions>) => {
-    const { success } = await hookUpdatePermissions(userId, updates);
-    if (success) {
-      await fetchUsers();
+  const handlePermissionChange = async (userId: string, permissionKey: keyof UserPermissions, value: boolean) => {
+    // Prevent users from modifying their own permissions
+    if (userId === currentUser?.id) {
+      toast({
+        title: "Action Not Allowed",
+        description: "You cannot modify your own permissions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('user_permissions')
+        .update({ [permissionKey]: value, updated_at: new Date().toISOString() })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Update local state
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === userId && user.permissions
+            ? {
+                ...user,
+                permissions: {
+                  ...user.permissions,
+                  [permissionKey]: value
+                }
+              }
+            : user
+        )
+      );
+
       toast({
         title: "Success",
         description: "User permissions updated successfully",
       });
-    } else {
+    } catch (error) {
+      console.error('Error updating permissions:', error);
       toast({
         title: "Error",
         description: "Failed to update user permissions",
@@ -148,26 +219,47 @@ export const UserManagement = () => {
   };
 
   const deleteUser = async (userId: string) => {
+    // Prevent users from deleting themselves
+    if (userId === currentUser?.id) {
+      toast({
+        title: "Action Not Allowed",
+        description: "You cannot delete your own account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent deleting super admins
+    const userToDelete = users.find(u => u.id === userId);
+    if (userToDelete?.permissions?.is_super_admin) {
+      toast({
+        title: "Action Not Allowed",
+        description: "Cannot delete super admin users.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      // We can only delete the user permissions, not the actual user account
-      // since that requires admin privileges
-      const { error } = await supabase
+      // Delete user permissions first
+      const { error: permError } = await supabase
         .from('user_permissions')
         .delete()
         .eq('user_id', userId);
         
-      if (error) throw error;
+      if (permError) throw permError;
 
       await fetchUsers();
+      
       toast({
         title: "Success",
-        description: "User permissions removed successfully",
+        description: "User removed successfully",
       });
     } catch (error) {
-      console.error('Error removing user permissions:', error);
+      console.error('Error removing user:', error);
       toast({
         title: "Error",
-        description: "Failed to remove user permissions",
+        description: "Failed to remove user",
         variant: "destructive",
       });
     }
@@ -178,24 +270,13 @@ export const UserManagement = () => {
   }, []);
 
   const PermissionsDialog = () => {
-    if (!selectedUser) return null;
+    if (!selectedUser || !selectedUser.permissions) return null;
 
-    const permissions: Partial<UserPermissions> = selectedUser.permissions || {
-      analytics_read: false,
-      analytics_write: false,
-      hero_read: false,
-      hero_write: false,
-      projects_read: false,
-      projects_write: false,
-      team_read: false,
-      team_write: false,
-      settings_read: false,
-      settings_write: false,
-      is_super_admin: false
-    };
+    const permissions = selectedUser.permissions;
+    const isCurrentUser = selectedUser.id === currentUser?.id;
 
     return (
-      <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-2xl">
+      <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield size={20} />
@@ -203,118 +284,83 @@ export const UserManagement = () => {
           </DialogTitle>
           <DialogDescription className="text-gray-400">
             Configure user access permissions for different sections of the admin panel.
+            {isCurrentUser && (
+              <span className="block mt-2 text-amber-400 font-medium">
+                ⚠️ Note: You cannot modify your own permissions
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
+        
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-200">Analytics</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Read Access</Label>
-                  <Switch
-                    checked={permissions.analytics_read || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { analytics_read: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Write Access</Label>
-                  <Switch
-                    checked={permissions.analytics_write || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { analytics_write: checked })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <PermissionSection
+              title="Analytics"
+              icon="📊"
+              permissions={permissions}
+              onPermissionChange={(key, value) => handlePermissionChange(selectedUser.id, key, value)}
+              readKey="analytics_read"
+              writeKey="analytics_write"
+              disabled={isCurrentUser}
+            />
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-200">Hero Section</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Read Access</Label>
-                  <Switch
-                    checked={permissions.hero_read || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { hero_read: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Write Access</Label>
-                  <Switch
-                    checked={permissions.hero_write || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { hero_write: checked })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <PermissionSection
+              title="Hero Section"
+              icon="🏠"
+              permissions={permissions}
+              onPermissionChange={(key, value) => handlePermissionChange(selectedUser.id, key, value)}
+              readKey="hero_read"
+              writeKey="hero_write"
+              disabled={isCurrentUser}
+            />
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-200">Projects</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Read Access</Label>
-                  <Switch
-                    checked={permissions.projects_read || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { projects_read: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Write Access</Label>
-                  <Switch
-                    checked={permissions.projects_write || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { projects_write: checked })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <PermissionSection
+              title="Projects"
+              icon="📁"
+              permissions={permissions}
+              onPermissionChange={(key, value) => handlePermissionChange(selectedUser.id, key, value)}
+              readKey="projects_read"
+              writeKey="projects_write"
+              disabled={isCurrentUser}
+            />
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-200">Team</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Read Access</Label>
-                  <Switch
-                    checked={permissions.team_read || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { team_read: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-gray-300">Write Access</Label>
-                  <Switch
-                    checked={permissions.team_write || false}
-                    onCheckedChange={(checked) => 
-                      handlePermissionChange(selectedUser.id, { team_write: checked })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
+            <PermissionSection
+              title="Team"
+              icon="👥"
+              permissions={permissions}
+              onPermissionChange={(key, value) => handlePermissionChange(selectedUser.id, key, value)}
+              readKey="team_read"
+              writeKey="team_write"
+              disabled={isCurrentUser}
+            />
+
+            <PermissionSection
+              title="Settings"
+              icon="⚙️"
+              permissions={permissions}
+              onPermissionChange={(key, value) => handlePermissionChange(selectedUser.id, key, value)}
+              readKey="settings_read"
+              writeKey="settings_write"
+              disabled={isCurrentUser}
+            />
           </div>
 
           <div className="border-t border-gray-700 pt-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-200">Super Administrator</h3>
-                <p className="text-sm text-gray-400">Full access to all features and settings</p>
+                <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
+                  <Shield size={18} />
+                  Super Administrator
+                </h3>
+                <p className="text-sm text-gray-400">Full access to all features and user management</p>
               </div>
               <Switch
-                checked={permissions.is_super_admin || false}
+                checked={permissions.is_super_admin}
                 onCheckedChange={(checked) => 
-                  handlePermissionChange(selectedUser.id, { is_super_admin: checked })
+                  handlePermissionChange(selectedUser.id, 'is_super_admin', checked)
                 }
+                disabled={isCurrentUser}
+                className={isCurrentUser ? "opacity-50" : ""}
               />
             </div>
           </div>
@@ -322,6 +368,51 @@ export const UserManagement = () => {
       </DialogContent>
     );
   };
+
+  const PermissionSection = ({ 
+    title, 
+    icon, 
+    permissions, 
+    onPermissionChange, 
+    readKey, 
+    writeKey, 
+    disabled 
+  }: {
+    title: string;
+    icon: string;
+    permissions: UserPermissions;
+    onPermissionChange: (key: keyof UserPermissions, value: boolean) => void;
+    readKey: keyof UserPermissions;
+    writeKey: keyof UserPermissions;
+    disabled: boolean;
+  }) => (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
+        <span>{icon}</span>
+        {title}
+      </h3>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-gray-300">Read Access</Label>
+          <Switch
+            checked={permissions[readKey] as boolean}
+            onCheckedChange={(checked) => onPermissionChange(readKey, checked)}
+            disabled={disabled}
+            className={disabled ? "opacity-50" : ""}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label className="text-gray-300">Write Access</Label>
+          <Switch
+            checked={permissions[writeKey] as boolean}
+            onCheckedChange={(checked) => onPermissionChange(writeKey, checked)}
+            disabled={disabled}
+            className={disabled ? "opacity-50" : ""}
+          />
+        </div>
+      </div>
+    </div>
+  );
 
   const CreateUserDialog = () => (
     <DialogContent className="bg-gray-900 border-gray-800 text-white">
@@ -331,12 +422,15 @@ export const UserManagement = () => {
           Create New User
         </DialogTitle>
         <DialogDescription className="text-gray-400">
-          Send an invitation to a new user. They will receive an email to complete their registration.
+          Create a new admin user account. They will be able to sign in immediately with these credentials.
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleCreateUser} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="create-email" className="text-gray-300">Email</Label>
+          <Label htmlFor="create-email" className="text-gray-300 flex items-center gap-2">
+            <Mail size={16} />
+            Email
+          </Label>
           <Input
             id="create-email"
             type="email"
@@ -349,14 +443,17 @@ export const UserManagement = () => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="create-password" className="text-gray-300">Password</Label>
+          <Label htmlFor="create-password" className="text-gray-300 flex items-center gap-2">
+            <Lock size={16} />
+            Password
+          </Label>
           <Input
             id="create-password"
             type="password"
             value={createUserData.password}
             onChange={(e) => setCreateUserData(prev => ({ ...prev, password: e.target.value }))}
             className="bg-gray-800 border-gray-700 text-white focus:border-blue-500"
-            placeholder="Enter password"
+            placeholder="Enter password (min 6 characters)"
             required
             disabled={createUserLoading}
             minLength={6}
@@ -380,7 +477,7 @@ export const UserManagement = () => {
             disabled={createUserLoading}
             className="bg-blue-600 hover:bg-blue-700"
           >
-            {createUserLoading ? 'Sending Invitation...' : 'Send Invitation'}
+            {createUserLoading ? 'Creating User...' : 'Create User'}
           </Button>
         </div>
       </form>
@@ -404,12 +501,15 @@ export const UserManagement = () => {
           <CardTitle className="flex items-center gap-2 text-white">
             <Users size={20} />
             User Management
+            <Badge variant="secondary" className="ml-2">
+              {users.length} {users.length === 1 ? 'User' : 'Users'}
+            </Badge>
           </CardTitle>
           <Dialog open={showCreateUserDialog} onOpenChange={setShowCreateUserDialog}>
             <DialogTrigger asChild>
               <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                 <UserPlus size={16} className="mr-2" />
-                Invite User
+                Create User
               </Button>
             </DialogTrigger>
             <CreateUserDialog />
@@ -421,8 +521,9 @@ export const UserManagement = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-gray-700">
-                <TableHead className="text-gray-300">User ID</TableHead>
+                <TableHead className="text-gray-300">Email</TableHead>
                 <TableHead className="text-gray-300">Role</TableHead>
+                <TableHead className="text-gray-300">Permissions</TableHead>
                 <TableHead className="text-gray-300">Created</TableHead>
                 <TableHead className="text-gray-300">Actions</TableHead>
               </TableRow>
@@ -430,26 +531,46 @@ export const UserManagement = () => {
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id} className="border-gray-700">
-                  <TableCell className="text-white font-mono text-sm">
-                    {user.id.substring(0, 8)}...
+                  <TableCell className="text-white">
+                    <div className="flex items-center gap-2">
+                      <Mail size={16} className="text-gray-400" />
+                      {user.email}
+                      {user.id === currentUser?.id && (
+                        <Badge variant="outline" className="text-xs text-blue-400">You</Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {user.permissions?.is_super_admin ? (
                       <Badge className="bg-red-600">Super Admin</Badge>
                     ) : (
-                      <Badge variant="secondary">User</Badge>
+                      <Badge variant="secondary">Admin User</Badge>
                     )}
                   </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {user.permissions?.analytics_write && <Badge className="bg-green-600 text-xs">Analytics</Badge>}
+                      {user.permissions?.hero_write && <Badge className="bg-blue-600 text-xs">Hero</Badge>}
+                      {user.permissions?.projects_write && <Badge className="bg-purple-600 text-xs">Projects</Badge>}
+                      {user.permissions?.team_write && <Badge className="bg-orange-600 text-xs">Team</Badge>}
+                      {user.permissions?.settings_write && <Badge className="bg-gray-600 text-xs">Settings</Badge>}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-gray-300">
-                    {new Date(user.created_at).toLocaleDateString()}
+                    <div className="flex items-center gap-2">
+                      <Calendar size={16} className="text-gray-400" />
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Dialog open={showPermissionsDialog && selectedUser?.id === user.id} 
-                             onOpenChange={(open) => {
-                               setShowPermissionsDialog(open);
-                               if (!open) setSelectedUser(null);
-                             }}>
+                      <Dialog 
+                        open={showPermissionsDialog && selectedUser?.id === user.id} 
+                        onOpenChange={(open) => {
+                          setShowPermissionsDialog(open);
+                          if (!open) setSelectedUser(null);
+                        }}
+                      >
                         <DialogTrigger asChild>
                           <Button
                             variant="ghost"
@@ -458,7 +579,7 @@ export const UserManagement = () => {
                               setSelectedUser(user);
                               setShowPermissionsDialog(true);
                             }}
-                            className="text-blue-400 hover:text-blue-300"
+                            className="text-blue-400 hover:text-blue-300 hover:bg-gray-800"
                           >
                             <Edit2 size={16} />
                           </Button>
@@ -470,7 +591,8 @@ export const UserManagement = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => deleteUser(user.id)}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-400 hover:text-red-300 hover:bg-gray-800"
+                        disabled={user.id === currentUser?.id || user.permissions?.is_super_admin}
                       >
                         <Trash2 size={16} />
                       </Button>
